@@ -1,0 +1,4 @@
+beer
+====
+
+Beer lookup. Magic
