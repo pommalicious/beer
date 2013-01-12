@@ -1,8 +1,30 @@
 from flask import Flask, jsonify, request
+from flask.ext.sqlalchemy import SQLAlchemy
 import requests
 import json
 from BeautifulSoup import BeautifulSoup
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/beer.db'
+db = SQLAlchemy(app)
+
+class Beer(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(200))
+	brewery = db.Column(db.String(200))
+	BA_URL = db.Column(db.String(200))
+	BA_rating = db.Column(db.Integer)
+	ABV = db.Column(db.String(20))
+	style = db.Column(db.String(200))
+	image_url = db.Column(db.String(200))
+
+	def __init__(self, beerName, brewery,url,rating,abv,style,image):
+		self.name = beerName
+		self.brewery = brewery
+		self.BA_URL = url
+		self.BA_rating = rating
+		self.ABV = abv
+		self.style = style
+		self.image_url = image
 
 def isInt(s):
 	try: 
@@ -10,6 +32,14 @@ def isInt(s):
 		return True
 	except ValueError:
 		return False
+
+@app.route("/autocomplete",methods=['GET'])
+def autocomplete():
+	beer_name = request.args['beer_name']
+	matchingBeers = Beer.query.filter(Beer.name.like("%"+beer_name+"%")).all()
+	print matchingBeers
+	print map(lambda x:{'name':x.name,'url':x.BA_URL},matchingBeers)
+	return json.dumps(map(lambda x:{'name':x.name,'url':x.BA_URL},matchingBeers))
 
 @app.route("/find_beer",methods=['GET'])
 def find_beer():
@@ -30,23 +60,22 @@ def find_beer():
 
 @app.route("/get_beer",methods=['GET'])
 def get_beer():
-	# search_url = "http://beeradvocate.com/search?qt=beer&q="+request.args['beer_name'].replace(" ","+")
-	# r = requests.get(search_url)
-	# soup = BeautifulSoup(r.text)
-	# # print soup.find(id="baContent").find("ul")
-	# links = soup.find(id="baContent").find("ul")
-	# # print "Hello"
-	# # print links
-	# beer_url = "http://beeradvocate.com"+links.find("li").find("a").get('href')
 	beer_url = request.args['beer_url']
-	#beer_url = "http://beeradvocate.com"+link
 	beer_id = beer_url.split("/")[-1]
-	# print beer_id
+	matched_beer = Beer.query.filter_by(BA_URL=beer_url).first() 
+	if matched_beer is not None:
+		print matched_beer
+		return jsonify({'image':matched_beer.image_url,
+						'rating':matched_beer.BA_rating,
+						'style':matched_beer.style,
+						'abv':matched_beer.ABV,
+						'name':matched_beer.name})
 
 	# Get beer image
-	image_url = "http://beeradvocate.com/im/beers/"+beer_id+".jpg"
+	image_url = "im/beers/"+beer_id+".jpg"
 	beer_request = requests.get(beer_url)
 	beer_soup = BeautifulSoup(beer_request.text)
+	beer_name = beer_soup.find("div","titleBar").find("h1").text.split("-")[0]
 	# print beer_soup
 
 	# Get rating
@@ -67,8 +96,14 @@ def get_beer():
 	if isInt(rating) and isInt(rb_rating):
 		overall = str((int(rating) + int(rb_rating))/2)
 
+	# Save to Database
+	newBeer = Beer(beer_name,"",beer_url,rating,abv,style,image_url)
+	db.session.add(newBeer)
+	db.session.commit()
+	print newBeer
+
 	# Create a dict
-	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv}
+	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv,'name':beer_name}
 
 	print beer_info
 
