@@ -78,17 +78,28 @@ def get_beer():
 	beer_name = beer_soup.find("div","titleBar").find("h1").text.split("-")[0]
 	# print beer_soup
 
-	# Get rating
+	# Get rating and other information
 	rating = beer_soup.find("span","BAscore_big").text
 	styleAbvParent = beer_soup.find(text='Style | ABV').findParent('td').text
 	style = styleAbvParent.split("ABV")[1].split("|")[0]
 	abv = styleAbvParent.split("ABV")[1].split("|")[1].split("ABV")[0].replace("&nbsp;","").strip()
+	brewery = styleAbvParent.split("Brewed by:")[1].split("&nbsp;")[0].strip()
+	location = styleAbvParent.split("&nbsp;")[1].split("Style")[0]
 
   # Get RateBeer rating
-	rb_search_url = "http://google.com/search?q=ratebeer+"+beer_soup.find("h1").text.replace(" ","+")
+	rb_search_url = "http://google.com/search?q=ratebeer+"+beer_name.replace(" ","+")
+	print rb_search_url
+	print beer_soup.find("h1").span.text.replace(" ","+")
 	rb_req = requests.get(rb_search_url)
 	rb_soup = BeautifulSoup(rb_req.text)
 	rb_rating = rb_soup.find('h3').text.split("-")[1].split("atRateBeer")[0].strip()
+	
+	rb_brewery_search_url = "http://google.com/search?q=ratebeer+"+brewery.replace(" ","+")
+	rb_req = requests.get(rb_brewery_search_url)
+	rb_soup = BeautifulSoup(rb_req.text)
+	rb_location = rb_soup.find('h3').text[rb_soup.find("h3").text.find(",")+1:].split("-RateBeer")[0].strip()
+	if len(rb_location) < 100:
+		location = rb_location
 
 	overall = rating
 	if not isInt(rating) and isInt(rb_rating):
@@ -100,10 +111,10 @@ def get_beer():
 	newBeer = Beer(beer_name,"",beer_url,rating,abv,style,image_url)
 	db.session.add(newBeer)
 	db.session.commit()
-	print newBeer
+	#print newBeer
 
 	# Create a dict
-	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv,'name':beer_name}
+	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv, 'name':beer_name, 'brewery':brewery, 'location':location}
 
 	print beer_info
 
