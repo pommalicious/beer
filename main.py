@@ -73,7 +73,7 @@ def get_beer():
 						'abv':matched_beer.ABV,
 						'name':matched_beer.name,
 						'location':matched_beer.location,
-						'brewery':matched_beer.brewery
+						'brewery':matched_beer.brewery,
 						'url':matched_beer.BA_URL})
 
 	# Get beer image
