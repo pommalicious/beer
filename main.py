@@ -4,23 +4,34 @@ import json
 from BeautifulSoup import BeautifulSoup
 app = Flask(__name__)
 
-@app.route("/",methods=['GET'])
-def get_beer():
+@app.route("/find_beer",methods=['GET'])
+def find_beer():
 	search_url = "http://beeradvocate.com/search?qt=beer&q="+request.args['beer_name'].replace(" ","+")
 	r = requests.get(search_url)
 	soup = BeautifulSoup(r.text)
-	# print soup.find(id="baContent").find("ul")
 	links = soup.find(id="baContent").find("ul")
-	# print "Hello"
-	# print links
-	beer_url = "http://beeradvocate.com"+links.find("li").find("a").get('href')
 	# print beer_url
+	urls = []
 	for li in links:
 		# print "li ", li
 		link = li.find("a")
-		if link.find("b").text.upper() == request.args['beer_name'].upper():
-			beer_url = "http://beeradvocate.com"+link.get('href')
-	# print beer_url
+		beer_name = link.find("b").text
+		beer_url = "http://beeradvocate.com"+link.get('href')
+		urls.append({"url":beer_url,"name":beer_name})
+	print urls
+	return json.dumps(urls)
+
+@app.route("/get_beer",methods=['GET'])
+def get_beer():
+	# search_url = "http://beeradvocate.com/search?qt=beer&q="+request.args['beer_name'].replace(" ","+")
+	# r = requests.get(search_url)
+	# soup = BeautifulSoup(r.text)
+	# # print soup.find(id="baContent").find("ul")
+	# links = soup.find(id="baContent").find("ul")
+	# # print "Hello"
+	# # print links
+	# beer_url = "http://beeradvocate.com"+links.find("li").find("a").get('href')
+	beer_url = request.args['beer_url']
 	#beer_url = "http://beeradvocate.com"+link
 	beer_id = beer_url.split("/")[-1]
 	# print beer_id
