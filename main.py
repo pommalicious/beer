@@ -33,9 +33,12 @@ def get_beer():
 
 	# Get rating
 	rating = beer_soup.find("span","BAscore_big").text
+	styleAbvParent = beer_soup.find(text='Style | ABV').findParent('td').text
+	style = styleAbvParent.split("ABV")[1].split("|")[0]
+	abv = styleAbvParent.split("ABV")[1].split("|")[1].split("ABV")[0].replace("&nbsp;","").strip()
 
 	# Create a dict
-	beer_info = {'image': image_url, 'rating': rating}
+	beer_info = {'image': image_url, 'rating': rating, 'style': style, 'abv': abv}
 
 	print beer_info
 
