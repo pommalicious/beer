@@ -41,8 +41,6 @@ def get_beer():
 
 	# Return JSON
 	return_json = jsonify(beer_info)
-	print return_json
-	#return_json = "blah"
 
 	return return_json
 	#return "<img src='"+image_url+"'/>\nrating: "+rating
