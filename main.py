@@ -16,8 +16,9 @@ class Beer(db.Model):
 	ABV = db.Column(db.String(20))
 	style = db.Column(db.String(200))
 	image_url = db.Column(db.String(200))
+	location = db.Column(db.String(200))
 
-	def __init__(self, beerName, brewery,url,rating,abv,style,image):
+	def __init__(self, beerName, brewery,url,rating,abv,style,image,location):
 		self.name = beerName
 		self.brewery = brewery
 		self.BA_URL = url
@@ -25,6 +26,7 @@ class Beer(db.Model):
 		self.ABV = abv
 		self.style = style
 		self.image_url = image
+		self.location = location
 
 def isInt(s):
 	try: 
@@ -69,7 +71,9 @@ def get_beer():
 						'rating':matched_beer.BA_rating,
 						'style':matched_beer.style,
 						'abv':matched_beer.ABV,
-						'name':matched_beer.name})
+						'name':matched_beer.name,
+						'location':matched_beer.location,
+						'brewery':matched_beer.brewery})
 
 	# Get beer image
 	image_url = "im/beers/"+beer_id+".jpg"
@@ -108,7 +112,7 @@ def get_beer():
 		overall = str((int(rating) + int(rb_rating))/2)
 
 	# Save to Database
-	newBeer = Beer(beer_name,"",beer_url,rating,abv,style,image_url)
+	newBeer = Beer(beer_name,brewery,beer_url,rating,abv,style,image_url,location)
 	db.session.add(newBeer)
 	db.session.commit()
 	#print newBeer
