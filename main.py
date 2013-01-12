@@ -73,7 +73,8 @@ def get_beer():
 						'abv':matched_beer.ABV,
 						'name':matched_beer.name,
 						'location':matched_beer.location,
-						'brewery':matched_beer.brewery})
+						'brewery':matched_beer.brewery
+						'url':matched_beer.BA_URL})
 
 	# Get beer image
 	image_url = "im/beers/"+beer_id+".jpg"
@@ -118,7 +119,7 @@ def get_beer():
 	#print newBeer
 
 	# Create a dict
-	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv, 'name':beer_name, 'brewery':brewery, 'location':location}
+	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv, 'name':beer_name, 'brewery':brewery, 'location':location, 'url':matched_beer.BA_URL}
 
 	print beer_info
 
