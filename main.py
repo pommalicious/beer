@@ -4,6 +4,13 @@ import json
 from BeautifulSoup import BeautifulSoup
 app = Flask(__name__)
 
+def isInt(s):
+	try: 
+		int(s)
+		return True
+	except ValueError:
+		return False
+
 @app.route("/find_beer",methods=['GET'])
 def find_beer():
 	search_url = "http://beeradvocate.com/search?qt=beer&q="+request.args['beer_name'].replace(" ","+")
@@ -48,8 +55,20 @@ def get_beer():
 	style = styleAbvParent.split("ABV")[1].split("|")[0]
 	abv = styleAbvParent.split("ABV")[1].split("|")[1].split("ABV")[0].replace("&nbsp;","").strip()
 
+  # Get RateBeer rating
+	rb_search_url = "http://google.com/search?q=ratebeer+"+beer_soup.find("h1").text.replace(" ","+")
+	rb_req = requests.get(rb_search_url)
+	rb_soup = BeautifulSoup(rb_req.text)
+	rb_rating = rb_soup.find('h3').text.split("-")[1].split("atRateBeer")[0].strip()
+
+	overall = rating
+	if not isInt(rating) and isInt(rb_rating):
+		overall = rb_rating
+	if isInt(rating) and isInt(rb_rating):
+		overall = str((int(rating) + int(rb_rating))/2)
+
 	# Create a dict
-	beer_info = {'image': image_url, 'rating': rating, 'style': style, 'abv': abv}
+	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv}
 
 	print beer_info
 
