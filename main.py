@@ -119,7 +119,7 @@ def get_beer():
 	#print newBeer
 
 	# Create a dict
-	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv, 'name':beer_name, 'brewery':brewery, 'location':location, 'url':matched_beer.BA_URL}
+	beer_info = {'image': image_url, 'rating': overall, 'style': style, 'abv': abv, 'name':beer_name, 'brewery':brewery, 'location':location, 'url':beer_url}
 
 	print beer_info
 
