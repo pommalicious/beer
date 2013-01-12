@@ -98,7 +98,7 @@ def get_beer():
 	rb_req = requests.get(rb_brewery_search_url)
 	rb_soup = BeautifulSoup(rb_req.text)
 	rb_location = rb_soup.find('h3').text[rb_soup.find("h3").text.find(",")+1:].split("-RateBeer")[0].strip()
-	if len(rb_location) < 100:
+	if len(rb_location) < 100 and rb_location.find("RateBeer") == -1 and rb_location.find("...") == -1:
 		location = rb_location
 
 	overall = rating
